@@ -60,7 +60,7 @@ fn parsing_empty_value_to_string() {
 fn parsing_file_contents() {
     let dir = tempfile::tempdir().unwrap();
     let file_path = dir.path().join("input.ini");
-    let contents = sample_string_contents();
+    let contents = format!("global=0\n{}", sample_string_contents());
 
     let res = std::fs::write(file_path.to_string_lossy().as_ref(), contents);
     assert_eq!(res.unwrap(), ());
@@ -69,6 +69,8 @@ fn parsing_file_contents() {
 
     assert_eq!(document.section_exists("games_rating"), true);
     assert_eq!(document.get_value("games_rating", "silksong").unwrap(), &Value::from_str("90%"));
+    assert_eq!(document.section_exists("_"), true);
+    assert_eq!(document.get_value("_", "global").unwrap(), &Value::Int(0));
 }
 
 #[test]
@@ -84,4 +86,24 @@ fn writing_to_disk() {
     let loaded_document = Document::build_from_file(&file_path.to_string_lossy()).unwrap();
     assert_eq!(loaded_document.section_exists("games_rating"), true);
     assert_eq!(loaded_document.get_value("games_rating", "silksong").unwrap(), &Value::from_str("90%"));
+}
+
+#[test]
+fn global_section_is_not_present_on_output_file() {
+    let dir = tempfile::tempdir().unwrap();
+    let file_path = dir.path().join("output.ini");
+
+    let mut document = Document::new();
+    document.add("_", "spike", Value::from_str("dog"));
+    document.add("pets", "arthur", Value::from_str("fox"));
+
+    let result = document.write_to_disk(&file_path.to_string_lossy());
+    assert_eq!(result.unwrap(), ());
+
+    let contents = std::fs::read_to_string(&file_path).unwrap();
+    assert_eq!(contents.contains("[_]"), false);
+
+    let loaded_document = Document::build_from_file(&file_path.to_string_lossy()).unwrap();
+    assert_eq!(loaded_document.section_exists("_"), true);
+    assert_eq!(loaded_document.section_exists("pets"), true);
 }

@@ -122,10 +122,18 @@ impl Document {
         let mut contents: String = String::new();
 
         for (section_name, section) in self.sections.iter() {
-            contents.push_str(&format!("[{}]\n", section_name));
+            if section_name != "_" {
+                contents.push_str(&format!("[{}]\n", section_name));
+            }
 
             for (key, value) in section.keys.iter() {
-                contents.push_str(&format!("{}={}\n", key, value.parse_str()));
+                let key_value = &format!("{}={}\n", key, value.parse_str());
+                
+                if section_name == "_" {
+                    contents.insert_str(0, key_value);
+                } else {
+                    contents.push_str(key_value);
+                }
             }
         }
 

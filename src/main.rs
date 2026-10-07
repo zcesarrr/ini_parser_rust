@@ -1,26 +1,8 @@
 fn test1() {
     let mut document = ini::Document::new();
-    document.add(
-        "pets", 
-        "arthur", 
-        ini::Value::new_string("fox")
-    );
-    document.add(
-        "pets", 
-        "spike",
-        ini::Value::new_string("dog")
-    );
-    document.add(
-        "pets",
-        "count",
-        ini::Value::Int(1),
-    );
-    document.add(
-        "pets",
-        "size",
-        ini::Value::Float(20.7),
-    );
-    document.add("games_pricing", "dandys_world", ini::Value::Float(59.99));
+    document.add("pets", "arthur", ini::Value::from_str("fox"));
+    document.add("_", "spike", ini::Value::from_str("dog"));
+    document.add("_", "katie", ini::Value::from_str("cat"));
 
     match document.write_to_disk("output.ini") {
         Ok(()) => println!("Document saved on output.ini"),
